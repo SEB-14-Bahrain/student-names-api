@@ -4,30 +4,41 @@ const app = express();
 
 app.use(express.json());
 
-let students = [
-  { id: 1, name: 'Aziz Mohamed A. Makhlooq' },
-  { id: 2, name: 'Abdullah Mohammed suleman A.butt' },
-  { id: 3, name: 'Abeer Ahmed Abdulrahman' },
-  { id: 4, name: 'Ali Husain Mohammed Saeed Abdul Alaliwat' },
-  { id: 5, name: 'Ali Jaafar Alasfoor' },
-  { id: 6, name: 'Ali Saleh Mahdi Saleh Ali Abdulla' },
-  { id: 7, name: 'Bayan Abdulla Ali Markhoos' },
-  { id: 8, name: 'Fadhel Sayed Abbas hassan hashem Mohamed' },
-  { id: 9, name: 'Hasan Ali Jasim' },
-  { id: 10, name: 'Hawra Abdullah Ali Mohamed Ali Markhoos' },
-  { id: 11, name: 'Hawra Sayed Abbas Ali Ebrahim Sharaf' },
-  { id: 12, name: 'Husain Ali Abdulmohsen Ateya Ali Abdulrasool' },
-  { id: 13, name: 'Husain Ali Isa Abdulnabi Jasim Almajed' },
-  { id: 14, name: 'Hussain Zuhair Almutawa' },
-  { id: 15, name: 'Jassim Mohamed A. Alawainati' },
-  { id: 16, name: 'Manar Alhamad' },
-  { id: 17, name: 'Marwa Mohamed Anwar Ghamtail' },
-  { id: 18, name: 'Rawan Salah J. Mohamed Haji' },
-  { id: 19, name: 'Ruqaya Sayed Adel S. Alsammak' },
-  { id: 20, name: 'Sayed Mohsen Kadhem Abdulla Ahmed Abdullah' },
-  { id: 21, name: 'Zainab Ali Salman Abdullah Ahmed' },
-  { id: 22, name: 'Fatema Hameed H. Ahmed' },
+const studentNames = [
+  'Aziz Mohamed A. Makhlooq',
+  'Abdullah Mohammed suleman A.butt',
+  'Abeer Ahmed Abdulrahman',
+  'Ali Husain Mohammed Saeed Abdul Alaliwat',
+  'Ali Jaafar Alasfoor',
+  'Ali Saleh Mahdi Saleh Ali Abdulla',
+  'Bayan Abdulla Ali Markhoos',
+  'Fadhel Sayed Abbas hassan hashem Mohamed',
+  'Hasan Ali Jasim',
+  'Hawra Abdullah Ali Mohamed Ali Markhoos',
+  'Hawra Sayed Abbas Ali Ebrahim Sharaf',
+  'Husain Ali Abdulmohsen Ateya Ali Abdulrasool',
+  'Husain Ali Isa Abdulnabi Jasim Almajed',
+  'Hussain Zuhair Almutawa',
+  'Jassim Mohamed A. Alawainati',
+  'Manar Alhamad',
+  'Marwa Mohamed Anwar Ghamtail',
+  'Rawan Salah J. Mohamed Haji',
+  'Ruqaya Sayed Adel S. Alsammak',
+  'Sayed Mohsen Kadhem Abdulla Ahmed Abdullah',
+  'Zainab Ali Salman Abdullah Ahmed',
+  'Fatema Hameed H. Ahmed',
 ];
+
+let students = studentNames.map((name, index) => {
+  return {
+    id: index + 1,
+    name: name,
+    favoriteFood: 'Not added yet',
+    favoriteEmoji: '🙂',
+  };
+});
+
+let nextStudentId = students.length + 1;
 
 app.get('/', (req, res) => {
   res.json({
@@ -42,10 +53,12 @@ app.get('/', (req, res) => {
   });
 });
 
+// INDEX
 app.get('/students', (req, res) => {
   res.json(students);
 });
 
+// SHOW
 app.get('/students/:studentId', (req, res) => {
   const studentId = Number(req.params.studentId);
 
@@ -62,6 +75,7 @@ app.get('/students/:studentId', (req, res) => {
   res.json(student);
 });
 
+// CREATE
 app.post('/students', (req, res) => {
   const newStudentName = req.body.name;
 
@@ -72,24 +86,22 @@ app.post('/students', (req, res) => {
   }
 
   const newStudent = {
-    id: students.length + 1,
+    id: nextStudentId,
     name: newStudentName,
+    favoriteFood: req.body.favoriteFood || 'Not added yet',
+    favoriteEmoji: req.body.favoriteEmoji || '🙂',
   };
+
+  nextStudentId++;
 
   students.push(newStudent);
 
   res.status(201).json(newStudent);
 });
 
+// UPDATE
 app.put('/students/:studentId', (req, res) => {
   const studentId = Number(req.params.studentId);
-  const updatedName = req.body.name;
-
-  if (!updatedName) {
-    return res.status(400).json({
-      message: 'Please provide a student name.',
-    });
-  }
 
   const student = students.find((student) => {
     return student.id === studentId;
@@ -101,11 +113,28 @@ app.put('/students/:studentId', (req, res) => {
     });
   }
 
-  student.name = updatedName;
+  if (!req.body.name && !req.body.favoriteFood && !req.body.favoriteEmoji) {
+    return res.status(400).json({
+      message: 'Please provide a name, favoriteFood, or favoriteEmoji.',
+    });
+  }
+
+  if (req.body.name) {
+    student.name = req.body.name;
+  }
+
+  if (req.body.favoriteFood) {
+    student.favoriteFood = req.body.favoriteFood;
+  }
+
+  if (req.body.favoriteEmoji) {
+    student.favoriteEmoji = req.body.favoriteEmoji;
+  }
 
   res.json(student);
 });
 
+// DELETE
 app.delete('/students/:studentId', (req, res) => {
   const studentId = Number(req.params.studentId);
 
